@@ -30,4 +30,4 @@ WORKDIR /app
 
 COPY --from=builder /app/main /app/main
 
-CMD [". /main"]
+CMD ["./main"]
