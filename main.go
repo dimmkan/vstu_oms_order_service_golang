@@ -70,7 +70,7 @@ func main() {
 		conf.Amqp.AMQP_EXCHANGE, // exchange
 		false,
 		nil)
-    service.FailOnError(err, "Failed to bind a queue")
+	service.FailOnError(err, "Failed to bind a queue")
 
 	//Set QoS
 	err = ch.Qos(
@@ -95,14 +95,18 @@ func main() {
 	var forever chan struct{}
 
 	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 30 * time.Second)
+		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer cancel()
 
 		for d := range msgs {
 			switch d.RoutingKey {
 			case "order.create.command":
 				{
-					handlers.CreateOrder(ctx, d, ch);
+					handlers.CreateOrder(ctx, d, ch)
+				}
+			case "order.changestatus.command":
+				{
+					handlers.ChangeOrderStatus(ctx, d, ch)
 				}
 			}
 		}
