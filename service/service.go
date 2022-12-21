@@ -40,8 +40,6 @@ func Deserialize(b []byte) (CreateOrderRequestType, error) {
 
 func DeserializeChangeStatus(b []byte) (ChangeOrderStatusType, error) {
 	var msg ChangeOrderStatusType
-	buf := bytes.NewBuffer(b)
-	decoder := json.NewDecoder(buf)
-	err := decoder.Decode(&msg)
+	err := json.Unmarshal(b, &msg)
 	return msg, err
 }
