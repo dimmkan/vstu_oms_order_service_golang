@@ -33,11 +33,9 @@ func CreateOrder(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
 	}
 	defer resp.Body.Close()
 
-	response, err := service.Serialize(struct{
-    Success bool;
-  }{
-    Success: true,
-  });
+	response, err := service.Serialize(map[string]bool{
+		"success": true,
+	});
 	service.FailOnError(err, "Failed to response serialized");
 
 	err = ch.PublishWithContext(ctx,
