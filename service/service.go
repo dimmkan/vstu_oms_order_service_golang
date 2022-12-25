@@ -41,9 +41,3 @@ func Deserialize[T DeserializeType](b []byte) (T, error) {
 	err := decoder.Decode(&msg)
 	return msg, err
 }
-
-// func DeserializeChangeStatus(b []byte) (ChangeOrderStatusType, error) {
-// 	var msg ChangeOrderStatusType
-// 	err := json.Unmarshal(b, &msg)
-// 	return msg, err
-// }
