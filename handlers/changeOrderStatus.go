@@ -15,7 +15,7 @@ import (
 )
 
 func ChangeOrderStatus(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
-	message, _ := service.DeserializeChangeStatus(d.Body)
+	message, _ := service.Deserialize[service.ChangeOrderStatusType](d.Body)
 
 	fmt.Println(d.Body)
 	fmt.Println(message)

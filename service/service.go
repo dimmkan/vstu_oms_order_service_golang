@@ -17,6 +17,10 @@ type ChangeOrderStatusType struct {
 	Status   string `json:"status"`
 }
 
+type DeserializeType interface {
+	CreateOrderRequestType | ChangeOrderStatusType
+}
+
 func FailOnError(err error, msg string) {
 	if err != nil {
 		log.Panicf("%s: %s", msg, err)
@@ -30,16 +34,16 @@ func Serialize(msg any) ([]byte, error) {
 	return b.Bytes(), err
 }
 
-func Deserialize(b []byte) (CreateOrderRequestType, error) {
-	var msg CreateOrderRequestType
+func Deserialize[T DeserializeType](b []byte) (T, error) {
+	var msg T
 	buf := bytes.NewBuffer(b)
 	decoder := json.NewDecoder(buf)
 	err := decoder.Decode(&msg)
 	return msg, err
 }
 
-func DeserializeChangeStatus(b []byte) (ChangeOrderStatusType, error) {
-	var msg ChangeOrderStatusType
-	err := json.Unmarshal(b, &msg)
-	return msg, err
-}
+// func DeserializeChangeStatus(b []byte) (ChangeOrderStatusType, error) {
+// 	var msg ChangeOrderStatusType
+// 	err := json.Unmarshal(b, &msg)
+// 	return msg, err
+// }
