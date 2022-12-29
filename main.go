@@ -14,12 +14,6 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type CreateOrderRequestType struct {
-	User_id     string `json:"user_id"`
-	Theme       string `json:"theme"`
-	Description string `json:"description"`
-}
-
 func init() {
 	if err := godotenv.Load(); err != nil {
 		log.Println("No .env file found!")
@@ -102,11 +96,11 @@ func main() {
 			switch d.RoutingKey {
 			case "order.create.command":
 				{
-					handlers.CreateOrder(ctx, d, ch)
+					go handlers.CreateOrder(ctx, d, ch)
 				}
 			case "order.changestatus.command":
 				{
-					handlers.ChangeOrderStatus(ctx, d, ch)
+					go handlers.ChangeOrderStatus(ctx, d, ch)
 				}
 			}
 		}

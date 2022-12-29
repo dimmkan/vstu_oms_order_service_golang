@@ -17,9 +17,6 @@ import (
 func ChangeOrderStatus(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
 	message, _ := service.Deserialize[service.ChangeOrderStatusType](d.Body)
 
-	fmt.Println(d.Body)
-	fmt.Println(message)
-
 	request_url := fmt.Sprintf("%s/items/orders/%s", config.New().Directus.DIRECTUS_HOST, message.Order_id)
 	client := &http.Client{Timeout: time.Second * 10}
 

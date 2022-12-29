@@ -9,24 +9,24 @@ import (
 
 	"log"
 	"vstu_oms_order_service/config"
-  "vstu_oms_order_service/service"
+	"vstu_oms_order_service/service"
 
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
 func CreateOrder(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
-  request_url := fmt.Sprintf("%s/items/orders", config.New().Directus.DIRECTUS_HOST);
-  client := &http.Client{Timeout: time.Second * 10};
+	request_url := fmt.Sprintf("%s/items/orders", config.New().Directus.DIRECTUS_HOST)
+	client := &http.Client{Timeout: time.Second * 10}
 
-  req, err := http.NewRequest("POST", request_url, bytes.NewBuffer(d.Body));
- 	if err != nil {
-		log.Fatal("Error reading request. ", err);
+	req, err := http.NewRequest("POST", request_url, bytes.NewBuffer(d.Body))
+	if err != nil {
+		log.Fatal("Error reading request. ", err)
 	}
 
-  req.Header.Set("Content-Type", "application/json");
-  req.Header.Set("staticToken", config.New().Directus.ADMIN_API_KEY);
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("staticToken", config.New().Directus.ADMIN_API_KEY)
 
-  // Send request
+	// Send request
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Fatal("Error reading response. ", err)
@@ -35,8 +35,8 @@ func CreateOrder(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
 
 	response, err := service.Serialize(map[string]bool{
 		"success": true,
-	});
-	service.FailOnError(err, "Failed to response serialized");
+	})
+	service.FailOnError(err, "Failed to response serialized")
 
 	err = ch.PublishWithContext(ctx,
 		"",        // exchange
@@ -48,6 +48,6 @@ func CreateOrder(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
 			CorrelationId: d.CorrelationId,
 			Body:          response,
 		})
-    service.FailOnError(err, "Failed to publish a message");
-	d.Ack(false);
+	service.FailOnError(err, "Failed to publish a message")
+	d.Ack(false)
 }
