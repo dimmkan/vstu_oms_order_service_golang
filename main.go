@@ -102,6 +102,10 @@ func main() {
 				{
 					go handlers.ChangeOrderStatus(ctx, d, ch)
 				}
+			case "order.changedescription.command":
+				{
+					go handlers.ChangeOrderDescription(ctx, d, ch)
+				}
 			}
 		}
 	}()
