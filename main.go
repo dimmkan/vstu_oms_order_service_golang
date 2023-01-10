@@ -106,6 +106,10 @@ func main() {
 				{
 					go handlers.ChangeOrderDescription(ctx, d, ch)
 				}
+			case "order.delete.command":
+				{
+					go handlers.DeleteOrder(ctx, d, ch)
+				}
 			}
 		}
 	}()
