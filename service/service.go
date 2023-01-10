@@ -18,16 +18,20 @@ type ChangeOrderStatusType struct {
 }
 
 type ChangeOrderDescriptionType struct {
-	Order_id string `json:"order_id"`
-	Description   string `json:"description"`
+	Order_id    string `json:"order_id"`
+	Description string `json:"description"`
 }
 
 type DeleteOrderType struct {
 	Order_id string `json:"order_id"`
 }
 
+type GetUserOrdersType struct {
+	User_id uint64 `json:"user_id"`
+}
+
 type DeserializeType interface {
-	CreateOrderRequestType | ChangeOrderStatusType | ChangeOrderDescriptionType | DeleteOrderType
+	CreateOrderRequestType | ChangeOrderStatusType | ChangeOrderDescriptionType | DeleteOrderType | GetUserOrdersType
 }
 
 func FailOnError(err error, msg string) {

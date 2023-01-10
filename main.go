@@ -110,6 +110,10 @@ func main() {
 				{
 					go handlers.DeleteOrder(ctx, d, ch)
 				}
+			case "order.getbyuser.query":
+				{
+					go handlers.GetUserOrders(ctx, d, ch)
+				}
 			}
 		}
 	}()
