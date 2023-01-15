@@ -96,23 +96,23 @@ func main() {
 			switch d.RoutingKey {
 			case "order.create.command":
 				{
-					go handlers.CreateOrder(ctx, d, ch)
+					handlers.CreateOrder(ctx, d, ch)
 				}
 			case "order.changestatus.command":
 				{
-					go handlers.ChangeOrderStatus(ctx, d, ch)
+					handlers.ChangeOrderStatus(ctx, d, ch)
 				}
 			case "order.changedescription.command":
 				{
-					go handlers.ChangeOrderDescription(ctx, d, ch)
+					handlers.ChangeOrderDescription(ctx, d, ch)
 				}
 			case "order.delete.command":
 				{
-					go handlers.DeleteOrder(ctx, d, ch)
+					handlers.DeleteOrder(ctx, d, ch)
 				}
 			case "order.getbyuser.query":
 				{
-					go handlers.GetUserOrders(ctx, d, ch)
+					handlers.GetUserOrders(ctx, d, ch)
 				}
 			}
 		}
