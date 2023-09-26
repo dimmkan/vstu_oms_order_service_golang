@@ -2,7 +2,6 @@ package handlers
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,10 +10,10 @@ import (
 	"vstu_oms_order_service/config"
 	"vstu_oms_order_service/service"
 
-	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/streadway/amqp"
 )
 
-func ChangeOrderStatus(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
+func ChangeOrderStatus(d amqp.Delivery, ch *amqp.Channel) {
 	message, _ := service.Deserialize[service.ChangeOrderStatusType](d.Body)
 
 	request_url := fmt.Sprintf("%s/items/orders/%s", config.New().Directus.DIRECTUS_HOST, message.Order_id)
@@ -40,7 +39,7 @@ func ChangeOrderStatus(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
 	})
 	service.FailOnError(err, "Failed to response serialized")
 
-	err = ch.PublishWithContext(ctx,
+	err = ch.Publish(
 		"",        // exchange
 		d.ReplyTo, // routing key
 		false,     // mandatory

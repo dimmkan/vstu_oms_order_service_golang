@@ -1,17 +1,15 @@
 package main
 
 import (
-	"context"
 	"fmt"
-	"time"
-
 	"log"
+	"sync"
 	"vstu_oms_order_service/config"
 	"vstu_oms_order_service/handlers"
 	"vstu_oms_order_service/service"
 
 	"github.com/joho/godotenv"
-	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/streadway/amqp"
 )
 
 func init() {
@@ -20,12 +18,25 @@ func init() {
 	}
 }
 
+func isValidRoutingKey(routingKey string) bool {
+	validKeys := map[string]struct{}{
+		"order.create.command":            struct{}{},
+		"order.changestatus.command":      struct{}{},
+		"order.changedescription.command": struct{}{},
+		"order.delete.command":            struct{}{},
+		"order.getbyuser.query":           struct{}{},
+	}
+
+	_, ok := validKeys[routingKey]
+	return ok
+}
+
 func main() {
 	conf := config.New()
-	amqp_connection_string := fmt.Sprintf("amqp://%s:%s@%s:5672/", conf.Amqp.AMQP_USER, conf.Amqp.AMQP_PASSWORD, conf.Amqp.AMQP_HOST)
+	amqpConnectionString := fmt.Sprintf("amqp://%s:%s@%s:5672/", conf.Amqp.AMQP_USER, conf.Amqp.AMQP_PASSWORD, conf.Amqp.AMQP_HOST)
 
 	// Open connect
-	conn, err := amqp.Dial(amqp_connection_string)
+	conn, err := amqp.Dial(amqpConnectionString)
 	service.FailOnError(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
@@ -57,7 +68,6 @@ func main() {
 	)
 	service.FailOnError(err, "Failed to declare a queue")
 
-	//Bind queue
 	err = ch.QueueBind(
 		q.Name,                  // queue name
 		"#",                     // routing key
@@ -86,38 +96,48 @@ func main() {
 	)
 	service.FailOnError(err, "Failed to register a consumer")
 
-	var forever chan struct{}
+	log.Printf(" [*] Waiting for requests. To exit press CTRL+C")
 
-	go func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
-		defer cancel()
+	// Ожидание завершения всех горутин
+	var wg sync.WaitGroup
 
-		for d := range msgs {
-			switch d.RoutingKey {
+	// Обработка полученных сообщений
+	for msg := range msgs {
+		if !isValidRoutingKey(msg.RoutingKey) {
+			// Если RoutingKey не в списке допустимых, игнорируем его
+			log.Printf("Received message with invalid routing key: %s", msg.RoutingKey)
+			msg.Nack(false, false) // Отправляем сообщение обратно в очередь
+			continue
+		}
+
+		wg.Add(1)
+		go func(msg amqp.Delivery, channel *amqp.Channel) {
+			defer wg.Done()
+			switch msg.RoutingKey {
 			case "order.create.command":
 				{
-					handlers.CreateOrder(ctx, d, ch)
+					handlers.CreateOrder(msg, channel)
 				}
 			case "order.changestatus.command":
 				{
-					handlers.ChangeOrderStatus(ctx, d, ch)
+					handlers.ChangeOrderStatus(msg, channel)
 				}
 			case "order.changedescription.command":
 				{
-					handlers.ChangeOrderDescription(ctx, d, ch)
+					handlers.ChangeOrderDescription(msg, channel)
 				}
 			case "order.delete.command":
 				{
-					handlers.DeleteOrder(ctx, d, ch)
+					handlers.DeleteOrder(msg, channel)
 				}
 			case "order.getbyuser.query":
 				{
-					handlers.GetUserOrders(ctx, d, ch)
+					handlers.GetUserOrders(msg, channel)
 				}
 			}
-		}
-	}()
+		}(msg, ch)
+	}
 
-	log.Printf(" [*] Waiting for requests. To exit press CTRL+C")
-	<-forever
+	// Ожидание завершения всех горутин
+	wg.Wait()
 }

@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"context"
 	"fmt"
 	"io"
 	"net/http"
@@ -11,10 +10,10 @@ import (
 	"vstu_oms_order_service/config"
 	"vstu_oms_order_service/service"
 
-	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/streadway/amqp"
 )
 
-func GetUserOrders(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
+func GetUserOrders(d amqp.Delivery, ch *amqp.Channel) {
 	message, _ := service.Deserialize[service.GetUserOrdersType](d.Body)
 
 	request_url := fmt.Sprintf("%s/items/orders?filter[user_id][_eq]=%v", config.New().Directus.DIRECTUS_HOST, message.User_id)
@@ -38,7 +37,7 @@ func GetUserOrders(ctx context.Context, d amqp.Delivery, ch *amqp.Channel) {
 	body, err := io.ReadAll(resp.Body)
 	service.FailOnError(err, "Failed to read get response")
 
-	err = ch.PublishWithContext(ctx,
+	err = ch.Publish(
 		"",        // exchange
 		d.ReplyTo, // routing key
 		false,     // mandatory
