@@ -16,7 +16,7 @@ import (
 func ChangeOrderDescription(d amqp.Delivery, ch *amqp.Channel) {
 	message, _ := service.Deserialize[service.ChangeOrderDescriptionType](d.Body)
 
-	request_url := fmt.Sprintf("%s/items/orders/%s", config.New().Directus.DIRECTUS_HOST, message.Order_id)
+	request_url := fmt.Sprintf("%s/items/orders/%d", config.New().Directus.DIRECTUS_HOST, message.Order_id)
 	client := &http.Client{Timeout: time.Second * 10}
 
 	req, err := http.NewRequest("PATCH", request_url, bytes.NewBuffer(d.Body))

@@ -13,17 +13,17 @@ type CreateOrderRequestType struct {
 }
 
 type ChangeOrderStatusType struct {
-	Order_id string `json:"order_id"`
+	Order_id uint64 `json:"order_id"`
 	Status   string `json:"status"`
 }
 
 type ChangeOrderDescriptionType struct {
-	Order_id    string `json:"order_id"`
+	Order_id    uint64 `json:"order_id"`
 	Description string `json:"description"`
 }
 
 type DeleteOrderType struct {
-	Order_id string `json:"order_id"`
+	Order_id uint64 `json:"order_id"`
 }
 
 type GetUserOrdersType struct {
